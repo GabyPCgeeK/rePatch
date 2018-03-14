@@ -23,13 +23,20 @@ static int ksceIoOpen_patched(const char *filename, int flag, SceIoMode mode) {
 	
 	if (memcmp("main", titleid, sizeof("main") - 1)==0) {
 		if (memcmp("ux0:/rePatch", filename, sizeof("ux0:/rePatch") - 1)!=0) {
-			if (strstr(filename, "eboot.bin") != NULL) {
+			if ((strstr(filename, "eboot.bin") != NULL) && (strstr(filename, ":/eboot.bin") == NULL)) {
 				char new_path[128];
-				char *old_path = strchr(strchr(filename, '/') + 1, '/') + 1;
-				if(old_path[0] == '/')
+				char *old_path = strchr(filename, '/');
+				if (old_path != NULL) {
 					old_path++;
-				snprintf(new_path, sizeof(new_path), "ux0:/rePatch/%s",old_path);
-				ret = ksceIoOpen(new_path, flag, mode);
+					old_path = strchr(old_path, '/');
+					if (old_path != NULL) {
+						old_path++;
+						if(old_path[0] == '/')
+							old_path++;
+						snprintf(new_path, sizeof(new_path), "ux0:/rePatch/%s",old_path);
+						ret = ksceIoOpen(new_path, flag, mode);
+					}
+				}
 			}
 		}
 	}
